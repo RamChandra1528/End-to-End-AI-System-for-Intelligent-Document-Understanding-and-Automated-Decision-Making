@@ -1,0 +1,51 @@
+{
+  "document_type": "report",
+  "fields_extracted": {
+    "title": "DEMO MODE - Tesseract not installed. Please install Tesseract OCR for full functionality.",
+    "sections": [],
+    "word_count": 13,
+    "model_entities": []
+  },
+  "decision": "Needs Revision",
+  "confidence_score": 0.6,
+  "validation": {
+    "valid": true,
+    "issues": [],
+    "warnings": [
+      "Missing recommended sections: abstract, introduction, conclusion",
+      "Word count (13) is below recommended minimum (1000)"
+    ],
+    "validation_details": {
+      "missing_sections": [
+        "abstract",
+        "introduction",
+        "conclusion"
+      ],
+      "word_count": 13,
+      "sections_found": []
+    }
+  },
+  "rule_violations": [],
+  "extracted_text": "DEMO MODE - Tesseract not installed. Please install Tesseract OCR for full functionality.",
+  "entities": [],
+  "predictions": {
+    "confidence": 0.6
+  },
+  "explainability_map": "outputs\\sample_invoice_summary.png",
+  "attention_map": null,
+  "token_importance": "outputs\\sample_invoice_importance.png",
+  "processing_time_seconds": 1.93,
+  "metadata": {
+    "file_name": "sample_invoice.png",
+    "document_id": "sample_invoice",
+    "model_name": "microsoft/layoutlmv3-base"
+  },
+  "reasoning": {
+    "validation": null,
+    "ranking": null,
+    "insights": [
+      "Missing recommended sections: abstract, introduction, conclusion",
+      "Word count (13) is below recommended minimum (1000)"
+    ]
+  }
+}

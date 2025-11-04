@@ -1,0 +1,325 @@
+# Core Deep Learning & ML
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.35.0
+accelerate>=0.25.0
+datasets>=2.14.0
+
+# Computer Vision & OCR
+opencv-python>=4.8.0
+pillow>=10.0.0
+pytesseract>=0.3.10
+easyocr>=1.7.0
+pdf2image>=1.16.3
+
+# NLP & Text Processing"""
+Streamlit Web Application for Document AI System
+"""
+import streamlit as st
+import requests
+from pathlib import Path
+import json
+from PIL import Image
+import io
+
+# Page configuration
+st.set_page_config(
+    page_title="Document AI System",
+    page_icon="📄",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Custom CSS
+st.markdown("""
+    <style>
+    .main {
+        padding: 2rem;
+    }
+    .stButton>button {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: bold;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+    .success-box {
+        padding: 1rem;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 8px;
+        color: #155724;
+    }
+    .error-box {
+        padding: 1rem;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        color: #721c24;
+    }
+    .info-box {
+        padding: 1rem;
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        border-radius: 8px;
+        color: #0c5460;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Title and description
+st.title("Document AI System")
+st.markdown("### Intelligent Document Understanding & Processing")
+st.markdown("---")
+
+# Sidebar
+with st.sidebar:
+    st.header("Settings")
+    
+    api_url = st.text_input(
+        "API URL",
+        value="http://localhost:8000",
+        help="Base URL of the Document AI API"
+    )
+    
+    generate_explanations = st.checkbox(
+        "Generate Explanations",
+        value=True,
+        help="Generate explainability visualizations"
+    )
+    
+    st.markdown("---")
+    st.header("API Endpoints")
+    st.markdown("""
+    - `/health` - Health check
+    - `/process` - Process document
+    - `/batch-process` - Batch processing
+    - `/rank-resumes` - Rank resumes
+    - `/validate-invoice` - Validate invoice
+    """)
+    
+    st.markdown("---")
+    st.header("Supported Formats")
+    st.markdown("""
+    - PDF (.pdf)
+    - Images (.png, .jpg, .jpeg)
+    - TIFF (.tiff, .tif)
+    """)
+
+# Main content
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    st.header("Upload Document")
+    
+    # File uploader
+    uploaded_file = st.file_uploader(
+        "Choose a document file",
+        type=['pdf', 'png', 'jpg', 'jpeg', 'tiff', 'tif'],
+        help="Upload an invoice, resume, or other document"
+    )
+    
+    if uploaded_file is not None:
+        st.success(f"File uploaded: {uploaded_file.name}")
+        
+        # Display image preview if it's an image file
+        if uploaded_file.type.startswith('image'):
+            try:
+                image = Image.open(uploaded_file)
+                st.image(image, caption="Document Preview", use_container_width=True)
+                uploaded_file.seek(0)  # Reset file pointer
+            except Exception as e:
+                st.warning(f"Could not display image preview: {e}")
+        
+        # Process button
+        if st.button("Process Document", type="primary"):
+            with st.spinner("Processing your document... This may take a moment."):
+                try:
+                    # Prepare the file for upload
+                    files = {
+                        'file': (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)
+                    }
+                    
+                    # Send request to API
+                    response = requests.post(
+                        f"{api_url}/process",
+                        files=files,
+                        params={'generate_explanations': generate_explanations},
+                        timeout=120
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        st.session_state['result'] = result
+                        st.session_state['job_id'] = result.get('job_id', 'N/A')
+                        st.success("Document processed successfully!")
+                        st.rerun()
+                    else:
+                        error_detail = response.json().get('detail', 'Unknown error')
+                        st.error(f"Error: {error_detail}")
+                        
+                except requests.exceptions.ConnectionError:
+                    st.error("Could not connect to API. Make sure the server is running.")
+                except requests.exceptions.Timeout:
+                    st.error("Request timed out. The document may be too large or complex.")
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+
+with col2:
+    st.header("Results")
+    
+    if 'result' in st.session_state:
+        result = st.session_state['result']
+        
+        # Display key information
+        st.markdown(f"**Job ID:** `{result.get('job_id', 'N/A')}`")
+        
+        # Document type
+        doc_type = result.get('document_type', 'Unknown')
+        st.markdown(f"### Document Type: **{doc_type.title()}**")
+        
+        # Decision and confidence
+        decision = result.get('decision', 'N/A')
+        confidence = result.get('confidence_score', 0)
+        
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.metric("Decision", decision)
+        with col_b:
+            st.metric("Confidence", f"{confidence:.1%}")
+        
+        # Validation status
+        validation = result.get('validation', {})
+        if validation.get('valid', False):
+            st.markdown('<div class="success-box">Document is valid</div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="error-box">Document has validation issues</div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # Extracted fields
+        st.subheader("Extracted Fields")
+        fields = result.get('fields_extracted', {})
+        if fields:
+            for key, value in fields.items():
+                st.text(f"{key}: {value}")
+        else:
+            st.info("No fields extracted")
+        
+        st.markdown("---")
+        
+        # Reasoning
+        st.subheader("Reasoning")
+        reasoning = result.get('reasoning', [])
+        if reasoning:
+            for i, reason in enumerate(reasoning, 1):
+                st.markdown(f"{i}. {reason}")
+        else:
+            st.info("No reasoning available")
+        
+        st.markdown("---")
+        
+        # Validation details
+        if validation:
+            with st.expander("Validation Details"):
+                st.json(validation)
+        
+        # Rule violations
+        rule_violations = result.get('rule_violations', [])
+        if rule_violations:
+            with st.expander("Rule Violations"):
+                for violation in rule_violations:
+                    st.warning(violation)
+        
+        # Metadata
+        metadata = result.get('metadata', {})
+        if metadata:
+            with st.expander("Metadata"):
+                st.json(metadata)
+        
+        # Processing time
+        processing_time = result.get('processing_time_seconds', 0)
+        st.caption(f"Processing time: {processing_time:.2f} seconds")
+        
+        # Download result as JSON
+        st.download_button(
+            label="Download Result (JSON)",
+            data=json.dumps(result, indent=2),
+            file_name=f"result_{result.get('job_id', 'unknown')}.json",
+            mime="application/json"
+        )
+        
+    else:
+        st.info("Upload and process a document to see results here")
+
+# Footer
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; color: #666;'>
+    <p>Document AI System v1.0.0 | Powered by LayoutLMv3 & FastAPI</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Health check in sidebar
+with st.sidebar:
+    st.markdown("---")
+    if st.button("Check API Health"):
+        try:
+            response = requests.get(f"{api_url}/health", timeout=5)
+            if response.status_code == 200:
+                health = response.json()
+                st.success("API is healthy")
+                st.json(health)
+            else:
+                st.error("API is not responding correctly")
+        except Exception as e:
+            st.error(f"Could not connect to API: {str(e)}")
+
+spacy>=3.7.0
+nltk>=3.8.1
+sentencepiece>=0.1.99
+protobuf>=3.20.0
+
+# Multi-Modal Models
+layoutparser>=0.3.4
+timm>=0.9.12
+
+# Explainability
+shap>=0.43.0
+lime>=0.2.0.1
+captum>=0.6.0
+
+# RAG & Knowledge Graphs
+langchain>=0.1.0
+langchain-community>=0.0.10
+chromadb>=0.4.18
+networkx>=3.2
+pyvis>=0.3.2
+
+# API & Web Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+aiofiles>=23.2.1
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+streamlit>=1.28.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+tqdm>=4.66.0
+pyyaml>=6.0.1
+loguru>=0.7.2
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.13.0
+plotly>=5.18.0

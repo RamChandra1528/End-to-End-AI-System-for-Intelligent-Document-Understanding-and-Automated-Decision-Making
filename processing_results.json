@@ -1,0 +1,147 @@
+{
+  "processing_timestamp": "2025-11-04T10:36:48.564804",
+  "total_documents": 3,
+  "average_processing_time": 2.4,
+  "average_confidence": 0.913,
+  "results": {
+    "invoice": {
+      "document_type": "invoice",
+      "fields_extracted": {
+        "invoice_no": "INV-2025-321",
+        "date": "March 15, 2025",
+        "vendor": "ABC Solutions Pvt Ltd",
+        "bill_to": "Flikt Technology",
+        "line_items": [
+          {
+            "description": "AI Model Development",
+            "amount": "$35,000"
+          },
+          {
+            "description": "System Integration",
+            "amount": "$15,000"
+          },
+          {
+            "description": "Testing & QA",
+            "amount": "$8,400"
+          }
+        ],
+        "subtotal": "$58,400",
+        "tax": "$0",
+        "total_amount": "$58,400"
+      },
+      "decision": "Valid",
+      "confidence_score": 0.94,
+      "validation": {
+        "valid": true,
+        "issues": [],
+        "warnings": [],
+        "checks_performed": [
+          "\u2713 Invoice number present",
+          "\u2713 Total calculation verified: $35,000 + $15,000 + $8,400 = $58,400",
+          "\u2713 Vendor information complete",
+          "\u2713 All required fields found"
+        ]
+      },
+      "reasoning": [
+        "All validations passed",
+        "Total matches line items sum"
+      ],
+      "processing_time_seconds": 2.3
+    },
+    "resume": {
+      "document_type": "resume",
+      "fields_extracted": {
+        "name": "John Doe",
+        "email": "john.doe@email.com",
+        "phone": "(555) 123-4567",
+        "location": "San Francisco, CA",
+        "experience_years": 7,
+        "education": [
+          "Master of Science in Computer Science - Stanford (2018)",
+          "Bachelor of Technology in CS - IIT Delhi (2016)"
+        ],
+        "skills": [
+          "Python",
+          "Java",
+          "C++",
+          "JavaScript",
+          "TensorFlow",
+          "PyTorch",
+          "Keras",
+          "NLP",
+          "Transformers",
+          "BERT",
+          "GPT",
+          "AWS",
+          "Azure",
+          "Docker",
+          "Kubernetes"
+        ],
+        "certifications": [
+          "AWS Certified Machine Learning - Specialty",
+          "TensorFlow Developer Certificate"
+        ],
+        "current_role": "Senior AI Engineer | Tech Corp"
+      },
+      "decision": "Highly Recommended",
+      "confidence_score": 0.89,
+      "ranking_score": 92,
+      "score_breakdown": {
+        "experience": 95,
+        "education": 100,
+        "skills": 90,
+        "certifications": 85
+      },
+      "reasoning": [
+        "7 years of relevant experience",
+        "Master's degree from top university",
+        "14+ technical skills including AI/ML",
+        "Active certifications",
+        "Leadership experience mentioned"
+      ],
+      "processing_time_seconds": 1.8
+    },
+    "report": {
+      "document_type": "report",
+      "fields_extracted": {
+        "title": "AI Document Processing System - Q1 2025 Progress",
+        "date": "March 31, 2025",
+        "author": "Tech Team",
+        "project_id": "PROJ-2025-AI-001",
+        "sections": [
+          "Abstract",
+          "Introduction",
+          "Methodology",
+          "Results",
+          "Conclusion"
+        ],
+        "word_count": 245,
+        "key_findings": [
+          "94% accuracy on invoice validation",
+          "2.3 seconds average processing time",
+          "15 requests/second API throughput",
+          "Production-ready system"
+        ]
+      },
+      "decision": "Complete",
+      "confidence_score": 0.91,
+      "validation": {
+        "valid": true,
+        "completeness_checks": [
+          "\u2713 Abstract section present",
+          "\u2713 Introduction section present",
+          "\u2713 Methodology section present",
+          "\u2713 Results section present",
+          "\u2713 Conclusion section present",
+          "\u2713 Word count: 245 (exceeds minimum 100)"
+        ]
+      },
+      "reasoning": [
+        "All required sections present",
+        "Meets minimum word count",
+        "Contains quantifiable results"
+      ],
+      "processing_time_seconds": 3.1
+    }
+  }
+}
